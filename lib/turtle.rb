@@ -174,42 +174,25 @@ class MoveOperation
   end
 end
 
-class ForwardOperation < MoveOperation
-  class << self
-    def move 
-      :forward 
+def create_move_operation(direction)
+  class_name = "#{direction.to_s.capitalize}Operation"
+  klass = Object.const_set(class_name, Class.new(MoveOperation))
+  
+  module_name = "#{direction.to_s.capitalize}Module"
+  module_object = Object.const_set(module_name, Module.new)
+  
+  module_object.class_exec do
+    define_method(:move) do
+      direction
     end
   end
+  
+  klass.extend module_object
+
+  klass
 end
 
-Parser.register_command "FD", ForwardOperation
-
-class BackwardOperation < MoveOperation
-  class << self
-    def move 
-      :backward 
-    end
-  end
-end
-
-Parser.register_command "BK", BackwardOperation
-
-class LeftOperation < MoveOperation
-  class << self
-    def move 
-      :left 
-    end
-  end
-end
-
-Parser.register_command "LT", LeftOperation
-
-class RightOperation < MoveOperation
-  class << self
-    def move 
-      :right 
-    end
-  end
-end
-
-Parser.register_command "RT", RightOperation
+Parser.register_command "FD", (create_move_operation :forward)
+Parser.register_command "BK", (create_move_operation :backward)
+Parser.register_command "LT", (create_move_operation :left)
+Parser.register_command "RT", (create_move_operation :right)
